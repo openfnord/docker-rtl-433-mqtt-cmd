@@ -6,9 +6,9 @@ import logging
 import json
 import paho.mqtt.client as mqtt
 import subprocess
-import string
+import queue
 
-# rtl-433-mqtt-cmd  -d -H 10.100.1.6 --user cli --password habitual-letdown-clubhouse
+message_queue = queue.Queue()
 
 def mqtt_connect(client, userdata, flags, rc):
     """Callback for MQTT connects."""
@@ -39,7 +39,7 @@ def mqtt_message(client, userdata, msg):
         logging.error("JSON decode error: " + msg.payload.decode())
         return
 
-    process_json_message(data)
+    message_queue.put(data)
 
 
 def process_json_message(data):
@@ -123,8 +123,13 @@ if __name__ == "__main__":
     client.connect_async(args.host, args.port, 60)
 
     logging.debug("MQTT Client: Starting Loop")
+    client.loop_start()
+    
     try:
-        client.loop_forever()
+        while True:
+            data = message_queue.get()
+            process_json_message(data)
     except KeyboardInterrupt:
+        client.loop_stop()
         pass
-
+    
