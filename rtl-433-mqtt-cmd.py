@@ -56,13 +56,16 @@ def process_json_message(data):
     # Re-add rtl_433
     cmd = " ".join(["rtl_433", cmd])
 
+    # Expand environmental vars
+    cmd = os.path.expandvars(cmd)
+
     # Split command into array
     cmd = cmd.split(" ")
 
     # Fetch timeout if present
     timeout = data.get("timeout", None)
 
-    logging.debug("Executing command '%s' with timeout %s", cmd, timeout or "N/A")
+    logging.debug("Executing command '%s' with timeout %s", " ".join(cmd), timeout or "N/A")
     try:
         subprocess.run(cmd, timeout=timeout)
     except Exception as e:
