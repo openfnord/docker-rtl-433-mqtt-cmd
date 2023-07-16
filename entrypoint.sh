@@ -23,9 +23,10 @@ if [ ! -z "$RTL_DEVICE" ]; then
   if [ "$RTL_DEVICE" != "$USB_BUS_PATH" ] && [ ! -f "$USB_BUS_PATH" ]; then
       mkdir -p "$(dirname "$USB_BUS_PATH")"
       ln -s "$RTL_DEVICE" "$USB_BUS_PATH"
+      echo "$RTL_DEVICE -> $USB_BUS_PATH"
   fi
 else
-  echo "No RTL_DEVICE set. No symlink created."
+  echo "RTL_DEVICE not set. No symlink created."
 fi
 
 # Call tini with original command
