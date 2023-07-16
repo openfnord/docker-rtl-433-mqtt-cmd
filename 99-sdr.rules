@@ -1,0 +1,21 @@
+# Custom udev rule to symlink RTL-SDR dongles to hopefully static paths
+
+ACTION=="remove", GOTO="sdr_end"
+SUBSYSTEM!="usb", GOTO="sdr_end"
+
+ATTR{idVendor}!="0bda", ATTR{idProduct}!="2838", GOTO="sdr_end"
+
+SUBSYSTEMS=="usb", IMPORT{builtin}="usb_id", IMPORT{builtin}="hwdb --subsystem=usb"
+
+# /dev/rtlsdr/by-path/, /dev/rtlsdr/by-id/ for USB devices
+
+IMPORT{builtin}="path_id"
+ENV{ID_PATH}=="?*", ENV{.ID_PORT}=="", SYMLINK+="rtlsdr/by-path/$env{ID_PATH}"
+ENV{ID_PATH}=="?*", ENV{.ID_PORT}=="?*", SYMLINK+="rtlsdr/by-path/$env{ID_PATH}-port$env{.ID_PORT}"
+
+ENV{ID_BUS}=="", GOTO="sdr_end"
+ENV{ID_SERIAL}=="", GOTO="sdr_end"
+ENV{.ID_PORT}=="", SYMLINK+="rtlsdr/by-id/$env{ID_BUS}-$env{ID_SERIAL}"
+ENV{.ID_PORT}=="?*", SYMLINK+="rtlsdr/by-id/$env{ID_BUS}-$env{ID_SERIAL}-port$env{.ID_PORT}"
+
+LABEL="sdr_end"
