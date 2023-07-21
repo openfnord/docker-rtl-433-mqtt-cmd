@@ -3,7 +3,8 @@
 ACTION=="remove", GOTO="sdr_end"
 SUBSYSTEM!="usb", GOTO="sdr_end"
 
-ATTR{idVendor}!="0bda", ATTR{idProduct}!="2838", GOTO="sdr_end"
+ATTR{idVendor}!="0bda", GOTO="sdr_end"
+ATTR{idProduct}!="2838", GOTO="sdr_end"
 
 SUBSYSTEMS=="usb", IMPORT{builtin}="usb_id", IMPORT{builtin}="hwdb --subsystem=usb"
 
