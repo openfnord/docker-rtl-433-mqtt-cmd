@@ -1,0 +1,3 @@
+[submodule "usbutils"]
+	path = usbutils
+	url = https://github.com/gregkh/usbutils.git
