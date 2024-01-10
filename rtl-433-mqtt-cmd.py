@@ -67,9 +67,18 @@ def process_json_message(data):
 
     logging.debug("Executing command '%s' with timeout %s", " ".join(cmd), timeout or "N/A")
     try:
-        subprocess.run(cmd, timeout=timeout)
+        result = subprocess.run(cmd, timeout=timeout)
     except Exception as e:
         logging.error("Command failed. " + str(e))
+        return
+    
+    # Nothing to do on clean run
+    if result.returncode == 0:
+        return
+
+    # Attempt to reset the RTL device
+    logging.warning("rtl_433 exited with %d. Attempting USB reset.", result.returncode)
+    subprocess.run(["usbreset", "0bda:2838"])
 
 
 if __name__ == "__main__":
