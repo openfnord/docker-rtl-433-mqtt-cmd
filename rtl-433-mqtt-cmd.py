@@ -1,14 +1,16 @@
 #! /usr/bin/env python3
 
-import os
 import argparse
-import logging
 import json
-import paho.mqtt.client as mqtt
-import subprocess
+import logging
+import os
 import queue
+import subprocess
+
+import paho.mqtt.client as mqtt
 
 message_queue = queue.Queue()
+
 
 def mqtt_connect(client, userdata, flags, rc):
     """Callback for MQTT connects."""
@@ -65,26 +67,29 @@ def process_json_message(data):
     # Fetch timeout if present
     timeout = data.get("timeout", None)
 
-    logging.debug("Executing command '%s' with timeout %s", " ".join(cmd), timeout or "N/A")
+    logging.debug("Executing command '%s' with timeout %s",
+                  " ".join(cmd), timeout or "N/A")
     try:
         result = subprocess.run(cmd, timeout=timeout)
     except Exception as e:
         logging.error("Command failed. " + str(e))
         return
-    
+
     # Nothing to do on clean run
     if result.returncode == 0:
         return
 
     # Attempt to reset the RTL device
-    logging.warning("rtl_433 exited with %d. Attempting USB reset.", result.returncode)
+    logging.warning(
+        "rtl_433 exited with %d. Attempting USB reset.", result.returncode)
     subprocess.run(["usbreset", "0bda:2838"])
 
 
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
 
-    parser = argparse.ArgumentParser(description="Subscribe to an MQTT topic and execute received commands in rtl_433.")
+    parser = argparse.ArgumentParser(
+        description="Subscribe to an MQTT topic and execute received commands in rtl_433.")
 
     parser.add_argument("-d", "--debug", action="store_true")
     parser.add_argument("-u", "--user", type=str, help="MQTT username")
@@ -93,13 +98,13 @@ if __name__ == "__main__":
                         help="MQTT hostname to connect to (default: %(default)s)")
     parser.add_argument("-p", "--port", type=int, default=1883,
                         help="MQTT port (default: %(default)s)")
-    parser.add_argument("-c", "--ca_cert", type=str, help="MQTT TLS CA certificate path")
+    parser.add_argument("-c", "--ca_cert", type=str,
+                        help="MQTT TLS CA certificate path")
     parser.add_argument("-t", "--topic", type=str,
                         default="rtl-433-cmd/",
                         dest="topic",
                         help="MQTT event topic to subscribe to (default: %(default)s)")
-    
-    
+
     args = parser.parse_args()
 
     if args.debug:
@@ -114,7 +119,8 @@ if __name__ == "__main__":
         args.password = os.environ['MQTT_PASSWORD']
 
     if not args.user or not args.password:
-        logging.warning("User or password is not set. Check credentials if subscriptions do not return messages.")
+        logging.warning(
+            "User or password is not set. Check credentials if subscriptions do not return messages.")
 
     client = mqtt.Client(userdata=args.topic)
 
@@ -136,7 +142,7 @@ if __name__ == "__main__":
 
     logging.debug("MQTT Client: Starting Loop")
     client.loop_start()
-    
+
     try:
         while True:
             data = message_queue.get()
@@ -144,4 +150,3 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         client.loop_stop()
         pass
-    
