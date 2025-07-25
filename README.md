@@ -7,6 +7,8 @@ The primary goal was to enable rtl_433 to periodically listen for temperature se
 ## udev Rules
 The included udev rule creates symlinks for RTL-SDR devices to a predictable path which can be referenced by Docker. Due to limitations of rtl_433, this symlink must be re-linked back to a /dev/bus/usb/XXX/YYY path within the container. This is handled by the entrypoint if RTL_DEVICE environment variable is set.
 
+Additionally, by installing rtl-sdr on the host system appropriate udev rules are created to ensure the RTL device is accessible by the plugdev group.
+
 ## Compose Example
 ```yaml
 services:

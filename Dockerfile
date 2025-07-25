@@ -7,10 +7,11 @@ RUN ./autogen.sh && make
 
 # Production step
 FROM hertzg/rtl_433
-RUN apk add --update tini python3 py3-pip py3-paho-mqtt eudev
+RUN apk add --update tini python3 py3-pip py3-paho-mqtt eudev su-exec
 COPY --from=build /usbutils/usbreset /usr/bin/usbreset
 COPY rtl-433-mqtt-cmd.py /usr/bin/rtl-433-mqtt-cmd
 COPY entrypoint.sh /usr/bin/entrypoint
+ENV PLUGDEV_GID="46"
 ENV HOST="127.0.0.1"
 ENV OPTIONS=""
 ENV MQTT_USERNAME=""

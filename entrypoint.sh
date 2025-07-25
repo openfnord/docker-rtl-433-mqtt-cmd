@@ -29,5 +29,9 @@ else
   echo "RTL_DEVICE not set. No symlink created."
 fi
 
+# Create user and group with necessary permissions
+addgroup -g $PLUGDEV_GID plugdev
+adduser -D -H rtl -G plugdev
+
 # Call tini with original command
-exec /sbin/tini -- "$@"
+exec su-exec rtl /sbin/tini -- "$@"
